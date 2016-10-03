@@ -1,0 +1,4 @@
+CXXFLAGS += -Wall -O3
+LIBS += -larmadillo
+
+: src/main.cpp |> clang++ $(CXXFLAGS) $(LIBS) %f -o %o |> build/literate
