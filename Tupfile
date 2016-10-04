@@ -1,4 +1,5 @@
-CXXFLAGS += -Wall -O3
+CXXFLAGS += -Wall -O3 -std=c++1z
 LIBS += -larmadillo
 
-: src/main.cpp |> clang++ $(CXXFLAGS) $(LIBS) %f -o %o |> build/literate
+: foreach src/*.cpp |> clang++ $(CXXFLAGS) -c %f -o %o |> build/%B.o
+: build/*.o |> clang++ $(CXXFLAGS) $(LIBS) %f -o %o |> build/literate
