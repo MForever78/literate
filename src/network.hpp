@@ -1,6 +1,8 @@
 #include <armadillo>
-#include <random>
+#include <cmath>
 #include <vector>
+
+typedef std::pair<arma::mat, int> trainingData;
 
 class Network {
 public:
@@ -16,11 +18,23 @@ public:
     }
   }
 
+  static void sigmoid(arma::vec &z) {
+    z.transform([](double val) { return 1 / (1 + exp(-val)); });
+  }
+
+  arma::vec feedforward(const arma::vec &input);
+  void sgd(std::vector<trainingData> &trainingSet, const int epochs,
+           const int miniBatchSize, const double eta);
+  void updateMiniBatch(std::vector<trainingData *> &miniBatch,
+                       const double eta);
+
 private:
   Network(){};
 
   int layerNumber;
   std::vector<int> sizes;
+  // biases[i] represents bias at (i+1)th layer
   std::vector<arma::vec> biases;
+  // weights[i] represents weight at ith layer
   std::vector<arma::mat> weights;
 };
