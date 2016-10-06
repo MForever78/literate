@@ -21,8 +21,16 @@ public:
     }
   }
 
-  static void sigmoid(arma::vec &z) {
+  static arma::vec sigmoid(arma::vec z) {
     z.transform([](double val) { return 1 / (1 + exp(-val)); });
+    return z;
+  }
+
+  static arma::vec sigmoidPrime(arma::vec z) {
+    arma::vec sigmoidZ = sigmoid(z);
+    arma::vec rhs = sigmoidZ;
+    rhs.transform([](double val) { return 1 - val; });
+    return sigmoidZ * arma::diagmat(rhs);
   }
 
   arma::vec feedforward(const arma::vec &input);
@@ -32,6 +40,7 @@ public:
                        const double eta);
   void backprop(arma::vec &in, arma::vec &out, std::vector<arma::vec> &partialB,
                 std::vector<arma::mat> &partialW);
+  arma::vec costDerivative(arma::vec &out, arma::vec &y);
 
 private:
   Network(){};
@@ -40,6 +49,6 @@ private:
   std::vector<int> sizes;
   // biases[i] represents bias at (i+1)th layer
   std::vector<arma::vec> biases, biasesShape;
-  // weights[i] represents weight at ith layer
+  // weights[i] represents weight from ith layer to (i+1)th layer
   std::vector<arma::mat> weights, weightsShape;
 };

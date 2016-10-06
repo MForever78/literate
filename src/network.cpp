@@ -11,8 +11,7 @@ using namespace arma;
 vec Network::feedforward(const vec &input) {
   vec output(input);
   for (int i = 0; i < sizes.size() - 1; ++i) {
-    output = output * weights[i] + biases[i];
-    sigmoid(output);
+    output = sigmoid(output * weights[i] + biases[i]);
   }
   return output;
 }
@@ -78,6 +77,35 @@ void Network::updateMiniBatch(std::vector<trainingData *> &miniBatch,
 }
 
 void Network::backprop(vec &in, vec &out, vector<vec> &partialB,
-                       vector<mat> &partialW) {}
+                       vector<mat> &partialW) {
+  vec activation(in);
+  vector<vec> activations, zValues;
+
+  activations.push_back(activation);
+
+  // feedforward
+  for (int i = 0; i < layerNumber - 1; ++i) {
+    vec z(sizes[i + 1]);
+    z = weights[i] * activation + biases[i];
+    zValues.push_back(z);
+    activation = sigmoid(z);
+    activations.push_back(activation);
+  }
+
+  // back propagation
+  vec delta = costDerivative(activations.back(), out) *
+              diagmat(sigmoidPrime(zValues.back()));
+  partialB.back() = delta;
+  partialW.back() = delta * activations[activations.size() - 2].t();
+
+  for (int i = layerNumber - 2; i > 0; --i) {
+    vec sp = sigmoidPrime(zValues[i - 1]);
+    delta = weights[i].t() * delta * diagmat(sp);
+    partialB[i - 1] = delta;
+    partialW[i - 1] = delta * activations[i - 1].t();
+  }
+}
+
+vec Network::costDerivative(vec &out, vec &y) { return out - y; }
 
 #endif
